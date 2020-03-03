@@ -1,0 +1,17 @@
+TRISB=%00000000
+TRISC=%10100000
+
+SYMBOL yesilled=portB.0
+SYMBOL sariled=portB.1
+SYMBOL yesilbuton=portC.5
+SYMBOL saributon=portC.7
+yesilled=0 : sariled=0
+label:
+    while yesilbuton=0	'pullup
+        yesilled=1
+    wend
+    while saributon=1		'pulldown
+        sariled=1
+    wend
+    yesilled=0 : sariled=0    
+GOTO label
