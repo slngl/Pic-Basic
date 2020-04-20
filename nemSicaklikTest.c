@@ -3,7 +3,8 @@
 
 int main(void) {
 	float T, RH,HI;
-	
+	printf("Sıcaklığı derece cinsinden giriniz: \n");
+	printf("Bağıl nemi % olarak giriniz: \n");
 	scanf("%f%f",&T,&RH);
   T=(T* 1.8000+32);
 	HI = 0-42.379 + 2.04901523*T + 10.14333127*RH - 0.22475541*T*RH - 0.00683783*T*T - 0.05481717*RH*RH + 0.00122874*T*T*RH + 0.00085282*T*RH*RH - 0.00000199*T*T*RH*RH;
