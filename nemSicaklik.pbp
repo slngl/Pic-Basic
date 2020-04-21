@@ -1,0 +1,289 @@
+'****************************************************************
+DEFINE LCD_DREG PORTD      'LCD data portunun baglandigi pic portu 
+DEFINE LCD_DBIT 0          '4-bit bus için data bit(0yada4) baslangiç
+DEFINE LCD_RSREG PORTE     'LCD RS in baglandigi pic portu 
+DEFINE LCD_RSBIT 0         'RS in baglandigi pic portE nin bit numarasi
+DEFINE LCD_EREG PORTE      'LCD E nin baglandigi pic portu 
+DEFINE LCD_EBIT 2          'LCD E nin baglandigi pic portE nin bit numarasi
+DEFINE LCD_BITS 8          'PortD nin 8 biti veri transferi için kullanildi
+TRISE=%000                 'Aslinda PortE.1 direkt topraga çekilse olurdu ama 
+PortE.1=0                  'PortE.1=0 olarak yaptik
+ADCON1=7                   'porta ve porte yi dijitale ayarla
+PAUSE 100
+
+TRISB=0
+Portb.0=0
+symbol sensor=portb.0
+LCDOUT $fe,$70,0,14,10,14,0,0,0,0
+i var byte : seviye var byte  : j var byte
+nem var byte : ondaliknem var byte : sicaklik var byte : ondaliksicaklik var byte : kontrol var byte
+seviye=0
+Label :
+    TrisB.0=0 ' picten sensore sinyal gitti(start sinyali)
+    sensor=0
+    pause 18 ' start sinyali için 18 milisaniye boyunca 0 veririz
+    sensor=1
+    pauseus 40 ' ardý ardýna iki sinyal sensoru uyandýrýyor
+    'pauseus mikrosaniye olarak bekletir
+    
+    TrisB.0=1
+    while sensor=0 'sensor 80 ms 0 sinyali gonderecek
+    wend
+    pauseus 85
+ '   if sensor=1 then 'ardýndan 80 ms boyunca da logic 1 sinyali gönderecek bu girdileri aldýðýmýzdan emin olduktan sonra artýk sýcaklýk ve nem girdileri almaya baþlayabiliriz
+    'toplamda 40 bitlik veri gelecektir
+    '8 bit nem verisi
+    '8 bit nemin ondalýk verisi
+    '8 bitlik sýcaklýk verisi
+    '8 bit sýcaklýðýn ondalýk verisi
+    '8 bit kontrol verisi
+         nem=0
+         for i=7 to 0 step -1 'msb bitleri once gelecegi icin tersten dongu kurduk
+            while sensor=0 'tüm bitlerine 0 atadýðýmýz için bir daha sýfýr atamaya gerek yok. sadece lojik 1 süresinin 28 ms'yi kontrol etmemiz yeterli
+            wend
+            pauseus 40      '28-70ms arasý olacak
+            
+            if sensor=1  then     'eger sensor 1 gonderirse o bit 1dir göndermezse basta 0 atadgýmýz icin otomatik olarak lojik 0 atanmis oluyor   
+                nem.0[i]=1  'i'ninci bite lojik 1 atadýk
+            endif
+            while sensor=1      'if ten sonra lojik 1 'in bittiðini check ettikten sonra for'a tekrar sokmamýz gerekiyor.
+            wend
+         next i
+         sicaklik=0 
+         
+         for i=7 to 0 step -1 'msb bitleri once gelecegi icin tersten dongu kurduk
+            while sensor=0 'tüm bitlerine 0 atadýðýmýz için bir daha sýfýr atamaya gerek yok. sadece lojik 1 süresinin 28 ms'yi kontrol etmemiz yeterli
+            wend
+            pauseus 40
+            if sensor=1  then
+                sicaklik.0[i]=1  'i'ninci bite lojik 1 atadýk
+            endif
+            while sensor=1      'if ten sonra lojik 1 'in bittiðini check ettikten sonra for'a tekrar sokmamýz gerekiyor.
+            wend
+          next i
+          
+           ondaliknem=0
+           for i=7 to 0 step -1 'msb bitleri once gelecegi icin tersten dongu kurduk
+            while sensor=0 'tüm bitlerine 0 atadýðýmýz için bir daha sýfýr atamaya gerek yok. sadece lojik 1 süresinin 28 ms'yi kontrol etmemiz yeterli
+            wend
+            pauseus 40
+            if sensor=1  then
+                ondaliknem.0[i]=1  'i'ninci bite lojik 1 atadýk
+            endif
+            while sensor=1      'if ten sonra lojik 1 'in bittiðini check ettikten sonra for'a tekrar sokmamýz gerekiyor.
+            wend
+          next i
+          ondaliksicaklik=0
+          for i=7 to 0 step -1 'msb bitleri once gelecegi icin tersten dongu kurduk
+            while sensor=0 'tüm bitlerine 0 atadýðýmýz için bir daha sýfýr atamaya gerek yok. sadece lojik 1 süresinin 28 ms'yi kontrol etmemiz yeterli
+            wend
+            pauseus 40
+            if sensor=1  then
+                ondaliksicaklik.0[i]=1  'i'ninci bite lojik 1 atadýk
+            endif
+            while sensor=1      'if ten sonra lojik 1 'in bittiðini check ettikten sonra for'a tekrar sokmamýz gerekiyor.
+            wend
+          next i
+           kontrol=0
+          for i=7 to 0 step -1 'msb bitleri once gelecegi icin tersten dongu kurduk
+            while sensor=0 'tüm bitlerine 0 atadýðýmýz için bir daha sýfýr atamaya gerek yok. sadece lojik 1 süresinin 28 ms'yi kontrol etmemiz yeterli
+            wend
+            pauseus 40
+            if sensor=1  then
+                kontrol.0[i]=1  'i'ninci bite lojik 1 atadýk
+            endif
+            while sensor=1      'if ten sonra lojik 1 'in bittiðini check ettikten sonra for'a tekrar sokmamýz gerekiyor.
+            wend
+          next i
+          
+                 
+          j=kontrol-nem  ' sicakligi hesaplayamadigim icin bu islemi yaptim
+         Lcdout $fe,1, "nem: ",#nem,"%" 
+         lcdout $fe, $c0, "sicaklik: ", #j, "'C  "  '$70'te derecenin sol ustundeki daire var ama lcd'de güzel gozukmedigi icin ' kullandim
+         'lcdout $fe,$c0, "sicaklik: ", #j,$70,"C" 
+          gosub oku
+         
+          
+  goto label
+  
+  oku:
+  if j>=25 and nem>=5 then 
+   if j=25 then
+    if nem<60 then seviye=0
+    If nem>=60 then seviye=1
+  endif
+  
+  if j=26 then
+    if nem<45 then seviye=0
+    If nem>=45 then seviye=1
+  endif
+  
+  if j=27 then
+    if nem<20 then seviye=0
+    If nem>=20 then seviye=1
+  endif
+  
+  if j=28 then
+    if nem<15 then seviye=0
+    if nem>=15 and nem<85 then seviye=1
+    If nem>=45 then seviye=2
+  endif
+  
+   if j=29 then
+    if nem<70 then seviye=1
+    if nem>=70 then seviye=2
+  endif
+  
+  if j=30 then
+    if nem<55 then seviye=1
+    if nem>=55 and nem<90 then seviye=2
+    If nem>=90 then seviye=3
+  endif
+  
+  if j=31 then
+    if nem<45 then seviye=1
+    if nem>=45 and nem<80 then seviye=2
+    If nem>=80 then seviye=3
+  endif
+  
+  if j=32 then
+    if nem<35 then seviye=1
+    if nem>=35 and nem<70 then seviye=2
+    If nem>=70 then seviye=3
+  endif
+  
+  if j=33 then
+    if nem<30 then seviye=1
+    if nem>30 and nem<60 then seviye=2
+    if nem>60 and nem<85 then seviye=3
+    If nem>=85 then seviye=4
+  endif
+  
+  if j=34 then
+    if nem<15 then seviye=0
+    if nem>=15 and nem<85 then seviye=1
+    If nem>=45 then seviye=2
+  endif
+  
+  if j=35 then
+    if nem<10 then seviye=1
+    if nem>=10 and nem<50 then seviye=2
+    if nem>50 and nem<75 then seviye=3
+    If nem>=45 then seviye=4
+  endif
+  
+  if j=36 then
+    if nem<45 then seviye=2
+    if nem>=45 and nem<65 then seviye=3
+    If nem>=65 then seviye=4
+  endif
+  
+  if j=37 then
+    if nem<35 then seviye=2
+    if nem>=35 and nem<60 then seviye=3
+    If nem>=60 then seviye=4
+  endif
+  
+  if j=38 then
+    if nem<30 then seviye=2
+    if nem>=30 and nem<55 then seviye=3
+    If nem>=55 then seviye=4
+  endif
+  
+  if j=39 then
+    if nem<30 then seviye=2
+    if nem>=30 and nem<50 then seviye=3
+    If nem>=50 then seviye=4
+  endif
+  
+  if j=40 then
+    if nem<25 then seviye=2
+    if nem>=25 and nem<45 then seviye=3    
+    if nem>=45  then seviye=4
+  endif
+    
+    
+   if j=41 then
+    if nem<20 then seviye=2
+    if nem>=20 and nem<40 then seviye=3
+    if nem>=40  then seviye=4
+  endif
+  
+  if j=42 then
+    if nem<15 then seviye=2
+    if nem>=15 and nem<40 then seviye=3
+    if nem>=40 then seviye=4
+  endif
+  
+  if j=43 then
+    if nem<10 then seviye=2
+    if nem>=10 and nem<85 then seviye=3
+    if nem>=35  then seviye=4
+  endif
+  
+  if j=44 then
+    if nem<5 then seviye=2
+    if nem>=5 and nem<30 then seviye=3
+    if nem>=30  then seviye=4
+  endif
+  
+  if j=45 then
+    if nem<5 then seviye=2
+    if nem>=5 and nem<25 then seviye=3
+    if nem>=25  then seviye=4
+  endif
+  
+  if j=46 then
+   if nem<5 then seviye=2
+    if nem>=5 and nem<25 then seviye=3
+    if nem>=25  then seviye=4
+  endif
+  
+  if j=47 then
+    if nem<20 then seviye=3
+    if nem>=20  then seviye=4
+  endif
+  
+  if j=48 then
+     if nem<20 then seviye=3
+    if nem>=20  then seviye=4
+  endif
+  
+  if j=49 then
+     if nem<15 then seviye=3
+    if nem>=15  then seviye=4
+  endif
+  
+  if j=50 then
+    if nem<15 then seviye=3
+    if nem>=15  then seviye=4
+  endif
+  else
+  seviye=5
+  endif
+  
+    if seviye=0 then
+        lcdout $fe, $94, " soguk-serin"
+        Lcdout $fe, $d4, "kontrol: ", #kontrol
+    endif
+    if seviye=1 then
+        lcdout $fe, $94, "sicak"
+        Lcdout $fe, $d4, "kontrol: ", #kontrol
+    endif
+    if seviye=2 then
+        lcdout $fe, $94, "cok sicak"
+        Lcdout $fe, $d4, "kontrol: ", #kontrol
+    endif
+    if seviye=3 then
+        lcdout $fe, $94, "tehlikeli sicak !"
+        Lcdout $fe, $d4, "kontrol: ", #kontrol
+    endif
+    if seviye=4 then
+        lcdout $fe, $94, "cok tehlikeli sicak !!"
+        Lcdout $fe, $d4, "kontrol: ", #kontrol
+    endif
+    If seviye=5   then
+         lcdout $fe, $94, "deger tabloda yok"
+         lcdout $fe, $d4, "hesaplanamadi"
+         endif
+    return
