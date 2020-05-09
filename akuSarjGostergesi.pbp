@@ -1,20 +1,20 @@
 '****************************************************************
 DEFINE LCD_DREG PORTD      'LCD data portunun baglandigi pic portu 
-DEFINE LCD_DBIT 0          '4-bit bus için data bit(0yada4) baslangiç
+DEFINE LCD_DBIT 0          '4-bit bus iÃ§in data bit(0yada4) baslangic
 DEFINE LCD_RSREG PORTB     'LCD RS in baglandigi pic portu 
 DEFINE LCD_RSBIT 0         'RS in baglandigi pic portB nin bit numarasi
 DEFINE LCD_EREG PORTB      'LCD B nin baglandigi pic portu 
 DEFINE LCD_EBIT 1          'LCD B nin baglandigi pic portB nin bit numarasi
-DEFINE LCD_BITS 8          'PortD nin 8 biti veri transferi için kullanildi
-TRISE=%000                 'Aslinda PortE.1 direkt topraga çekilse olurdu ama 
+DEFINE LCD_BITS 8          'PortD nin 8 biti veri transferi iÃ§in kullanildi
+TRISE=%000                 'Aslinda PortE.1 direkt topraga cekilse olurdu ama 
 PortE.1=0                  'PortE.1=0 olarak yaptik
 PAUSE 100
 
-define ADC_BITS 8 'analogtan digitale çevrilen bit kaç tanedir 0-255
-define ADC_CLOCK 1 'kullanýlan osilatorun tur ve frekansýna goredeger alýr 4 Mhz kristal osilator icin 1
+define ADC_BITS 8 'analogtan dijitale cevrilen bit kac tanedir 0-255
+define ADC_CLOCK 1 'kullanilan osilatorun tur ve frekansina gore deger alir 4 Mhz kristal osilator icin 1
 define ADC_SAPMLEUS 50 'analogtan dijitale 
 TRISA=%000001
-ADCON1=0        'tüm analog giriþler analog kaldý
+ADCON1=0        'tÃ¼m analog girisler analog kaldi
 
 i var byte : j var word : k var byte : m var byte : n var byte 
 
@@ -32,7 +32,7 @@ label:
 
 
     
-    j=i*136    'j=i*10 : j=j*(13,6) ama float deger alamiyoruz o yuzden ayný adýmda yazdim
+    j=i*136    'j=i*10 : j=j*(13,6) aku sarji max 13.6V, min 12.6V olmali
     j=j/255
    
     
@@ -70,7 +70,7 @@ label:
         lcdout $fe,$c0,7,1," %10"  
         pause 500
         lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"                                     
-        lcdout $fe,$c0,0,1," %10"  
+        lcdout $fe,$c0,0,1," %10"  'yanip sonen satir tek disli pil-bos pil
         pause 500
         lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"    
     endif
@@ -78,7 +78,7 @@ label:
         lcdout $fe,$c0,0,1," %0"  
         pause 500
         lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt" 
-        lcdout $fe,$c0,"  "," %0"  
+        lcdout $fe,$c0,"  "," %0"  'bos pil yanip sonmeli ama %0 sabit kalmali
         pause 500
         lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"   
     endif
