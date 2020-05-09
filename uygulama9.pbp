@@ -1,0 +1,91 @@
+'****************************************************************
+DEFINE LCD_DREG PORTD      'LCD data portunun baglandigi pic portu 
+DEFINE LCD_DBIT 0          '4-bit bus için data bit(0yada4) baslangiç
+DEFINE LCD_RSREG PORTB     'LCD RS in baglandigi pic portu 
+DEFINE LCD_RSBIT 0         'RS in baglandigi pic portB nin bit numarasi
+DEFINE LCD_EREG PORTB      'LCD B nin baglandigi pic portu 
+DEFINE LCD_EBIT 1          'LCD B nin baglandigi pic portB nin bit numarasi
+DEFINE LCD_BITS 8          'PortD nin 8 biti veri transferi için kullanildi
+TRISE=%000                 'Aslinda PortE.1 direkt topraga çekilse olurdu ama 
+PortE.1=0                  'PortE.1=0 olarak yaptik
+PAUSE 100
+
+define ADC_BITS 8 'analogtan digitale çevrilen bit kaç tanedir 0-255
+define ADC_CLOCK 1 'kullanýlan osilatorun tur ve frekansýna goredeger alýr 4 Mhz kristal osilator icin 1
+define ADC_SAPMLEUS 50 'analogtan dijitale 
+TRISA=%000001
+ADCON1=0        'tüm analog giriþler analog kaldý
+
+i var byte : j var word : k var byte : m var byte : n var byte 
+
+lcdout $fe,$40,31,16,16,16,16,16,31  'bos sol  = 0
+lcdout $fe,$48,28,4,7,1,7,4,28               'bos sag  = 1
+lcdout $fe,$50,28,20,23,17,23,20,28          'yari sag   =2
+lcdout $fe,$58,28,28,31,31,31,28,28           'dolu sag  =3
+lcdout $fe,$60,31,31,31,31,31,31,31   'dolu sol = 4
+lcdout $fe,$68,31,30,30,30,30,30,31   'yari dolu sol = 5
+lcdout $fe,$70,31,28,28,28,28,28,31   'ceyrek dolu sol =6
+lcdout $fe,$78,31,24,24,24,24,24,31   'son dis sol =7
+
+label:
+    ADCIN 0,i
+
+
+    
+    j=i*136    'j=i*10 : j=j*(13,6) ama float deger alamiyoruz o yuzden ayný adýmda yazdim
+    j=j/255
+   
+    
+    n= j dig 2
+    k= j dig 1
+    m= j dig 0
+    
+    
+    if j>134 then                                    
+        lcdout $fe,$c0,4,3," %100"  
+        pause 500
+        lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"    
+    endif
+    if j<=134 and j>132 then                                    
+        lcdout $fe,$c0,4,2," %80"  
+        pause 500
+        lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"    
+    endif
+    if j<=132 and j>130 then                                    
+        lcdout $fe,$c0,4,1," %60"  
+        pause 500
+        lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"    
+    endif
+    if j<=130 and j>128 then                                    
+        lcdout $fe,$c0,5,1," %40"  
+        pause 500
+        lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"    
+    endif
+    if j<=128 and j>126 then                                    
+        lcdout $fe,$c0,6,1," %20"  
+        pause 500
+        lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"    
+    endif
+    if j<=126 and j>124 then                                    
+        lcdout $fe,$c0,7,1," %10"  
+        pause 500
+        lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"                                     
+        lcdout $fe,$c0,0,1," %10"  
+        pause 500
+        lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"    
+    endif
+    if j<=124 then
+        lcdout $fe,$c0,0,1," %0"  
+        pause 500
+        lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt" 
+        lcdout $fe,$c0,"  "," %0"  
+        pause 500
+        lcdout $fe,1,"Aku: ",#n,#k,",",#m," Volt"   
+    endif
+    
+goto label
+    
+    
+    
+    
+   
